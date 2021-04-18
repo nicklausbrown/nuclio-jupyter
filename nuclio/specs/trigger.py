@@ -9,6 +9,7 @@ from nuclio.specs import CamelBaseModel
 class CronTrigger(CamelBaseModel):
 
     kind: str = 'cron'
+    max_workers: Optional[int] = 1
 
     class Attributes(CamelBaseModel):
         schedule: str = None
@@ -46,6 +47,7 @@ class KafkaWorkerAllocationModeOptions(enum.Enum):
 class KafkaTrigger(CamelBaseModel):
 
     kind: str = 'kafka-cluster'
+    max_workers: Optional[int] = 1
 
     class Attributes(CamelBaseModel):
 
@@ -81,8 +83,9 @@ class V3ioOffsetOptions(enum.Enum):
 class V3ioStreamTrigger(CamelBaseModel):
 
     kind: str = 'v3ioStream'
-    url: str = 'http://v3io-webapi:8081/'
     max_workers: int = 1
+
+    url: str = 'http://v3io-webapi:8081/'
     password: SecretStr = None
 
     class Attributes(CamelBaseModel):

@@ -4,7 +4,8 @@ from typing import Dict, List, Union, Optional
 from pydantic import Field
 
 from nuclio.specs import CamelBaseModel
-from volume import VolumeSpec
+from .volume import VolumeSpec
+from .trigger import HttpTrigger, KafkaTrigger, V3ioStreamTrigger, CronTrigger
 
 
 class FunctionMetadata(CamelBaseModel):
@@ -50,20 +51,22 @@ class ResourcesSpec(CamelBaseModel):
     limits: Resources = Resources()
 
 
+class PlatformRestartPolicy(CamelBaseModel):
+    name: str = None
+    maximum_retry_count: int = None
+
+
+class PlatformMountOptions(Enum):
+    bind = "bind"
+    volume = "volume"
+
+
 class PlatformSpec(CamelBaseModel):
 
     class Attributes(CamelBaseModel):
 
-        class RestartPolicy(CamelBaseModel):
-            name: str = None
-            maximum_retry_count: int = None
-
-        class MountOptions(Enum):
-            bind = "bind"
-            volume = "volume"
-
-        restart_policy: RestartPolicy = RestartPolicy()
-        mount_mode: Union[MountOptions, str] = MountOptions.bind
+        restart_policy: PlatformRestartPolicy = PlatformRestartPolicy()
+        mount_mode: Union[PlatformMountOptions, str] = PlatformMountOptions.bind
 
     attributes: Attributes = Attributes()
 
@@ -72,13 +75,13 @@ class NuclioPythonSpec(CamelBaseModel):
 
     runtime: str = "python:3.6"
     handler: str = "main:handler"
-
     description: Optional[str] = None
+
     image: Optional[str] = None
 
-    replicas: int = 0
-    min_replicas: int = 1
-    max_replicas: int = 4
+    min_replicas: Optional[int] = 1
+    max_replicas: Optional[int] = 2
+    replicas: Optional[int] = None  # should this be zero?
     target_cpu: Optional[int] = Field(default=None, alias="targetCPU")
 
     readiness_timeout_seconds: Optional[int] = None
@@ -87,6 +90,10 @@ class NuclioPythonSpec(CamelBaseModel):
 
     env: List[EnvVariableSpec] = Field(default_factory=lambda: list())
     volumes: List[VolumeSpec] = Field(default_factory=lambda: list())
+    triggers: List[Union[HttpTrigger,
+                         KafkaTrigger,
+                         V3ioStreamTrigger,
+                         CronTrigger]] = Field(default_factory=lambda: list())
     resources: Optional[ResourcesSpec] = ResourcesSpec()
     platform: Optional[PlatformSpec] = PlatformSpec()
     security_context: Optional[SecurityContextSpec] = SecurityContextSpec()
@@ -106,8 +113,11 @@ class NuclioConfig(CamelBaseModel):
         else:
             self.spec.env.append(variable)
 
-    def mount(self, volume: VolumeSpec):
+    def add_mount(self, volume: VolumeSpec):
         self.spec.volumes.append(volume)
+
+    def add_trigger(self, trigger: Union[HttpTrigger, KafkaTrigger, V3ioStreamTrigger, CronTrigger]):
+        self.spec.triggers.append(trigger)
 
     def to_dict(self, *args, **kwargs):
         return self.dict(*args, **kwargs)
