@@ -50,9 +50,9 @@ class KafkaTrigger(CamelBaseModel):
     class Attributes(CamelBaseModel):
 
         consumer_group: str = None
-        topics: List[str] = Field(default_factory=lambda x: list())
-        brokers: List[str] = Field(default_factory=lambda x: list())
-        partitions: List[int] = Field(default_factory=lambda x: list())
+        topics: List[str] = Field(default_factory=lambda: list())
+        brokers: List[str] = Field(default_factory=lambda: list())
+        partitions: List[int] = Field(default_factory=lambda: list())
 
         initial_offset: Optional[KafkaOffsetOptions] = None
         session_timeout: Optional[str] = None
@@ -97,3 +97,43 @@ class V3ioStreamTrigger(CamelBaseModel):
         read_batch_size: Optional[int] = None
         sequence_number_commit_interval: Optional[str] = None
         session_timeout: Optional[str] = None
+
+    attributes: Attributes = Attributes()
+
+
+class HttpIngresses(CamelBaseModel):
+    host: str = None
+    paths: List[str] = Field(default_factory=lambda: list())
+
+
+class HttpCORS(CamelBaseModel):
+    enabled: bool = True
+    allow_origins: Optional[List[str]] = None
+    allow_methods: Optional[List[str]] = None
+    allow_headers: Optional[List[str]] = None
+    allow_credentials: Optional[bool] = None
+    preflight_max_age_seconds: Optional[int] = None
+
+
+class HttpServiceOptions(enum.Enum):
+    internal = 'ClusterIP'
+    external = 'NodePort'
+
+
+class HttpTrigger(CamelBaseModel):
+
+    kind: str = 'http'
+    max_workers: Optional[int] = 1
+
+    class Attributes(CamelBaseModel):
+
+        port: Optional[int] = None
+        max_request_body_size: Optional[int] = None
+        read_buffer_size: Optional[int] = None
+
+        ingresses: Optional[Dict[str, HttpIngresses]] = Field(default_factory=lambda: dict())
+        cors: Optional[HttpCORS] = None
+
+        service_type: Optional[HttpServiceOptions] = None
+
+    attributes: Attributes = Attributes()
