@@ -10,3 +10,4 @@ class CamelBaseModel(BaseModel):
     class Config:
         alias_generator = to_camel
         validate_assignment = True
+        use_enum_values = True
