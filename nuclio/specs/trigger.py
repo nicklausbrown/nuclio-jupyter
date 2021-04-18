@@ -1,7 +1,7 @@
 
 import enum
 from typing import Optional, Dict, Union, List
-from pydantic import Field
+from pydantic import Field, SecretStr
 
 from nuclio.specs import CamelBaseModel
 
@@ -70,3 +70,30 @@ class KafkaTrigger(CamelBaseModel):
         rebalance_retry_timeout: Optional[str] = None
         max_wait_handler_during_rebalance: Optional[str] = None
 
+    attributes: Attributes = Attributes()
+
+
+class V3ioOffsetOptions(enum.Enum):
+    earliest = 'Earliest'
+    latest = 'Latest'
+
+
+class V3ioStreamTrigger(CamelBaseModel):
+
+    kind: str = 'v3ioStream'
+    url: str = 'http://v3io-webapi:8081/'
+    max_workers: int = 1
+    password: SecretStr = None
+
+    class Attributes(CamelBaseModel):
+
+        consumer_group: str = None
+        container_name: str = None
+        stream_path: str = None
+
+        seek_to: Optional[V3ioOffsetOptions] = None
+        heartbeat_interval: Optional[str] = None
+        polling_interval_ms: Optional[int] = None
+        read_batch_size: Optional[int] = None
+        sequence_number_commit_interval: Optional[str] = None
+        session_timeout: Optional[str] = None
