@@ -24,17 +24,17 @@ class S3Attributes(CamelBaseModel):
 class ArchiveAttributes(CamelBaseModel):
 
     class Headers(CamelBaseModel):
-        v3io_key = Field(default=None, alias='X-V3io-Session-Key')
+        v3io_key: str = Field(default=None, alias='X-V3io-Session-Key')
 
-    headers: Headers()
+    headers: Headers = Headers()
     work_dir: Optional[str] = None
 
 
 class GithubAttributes(CamelBaseModel):
 
     class Headers(CamelBaseModel):
-        auth_token = Field(default=None, alias='Authorization')
+        auth_token: str = Field(default=None, alias='Authorization')
 
     branch: str
-    headers: Headers()
+    headers: Headers = Headers()
     work_dir: Optional[str] = None

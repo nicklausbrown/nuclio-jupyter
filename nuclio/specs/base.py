@@ -10,6 +10,20 @@ from .code_entry import CodeEntryType, S3Attributes, ArchiveAttributes, GithubAt
 
 
 class FunctionMetadata(CamelBaseModel):
+    """ Nuclio function metadata
+
+    Attributes
+    ----------
+    name : str
+        The name of the function
+    namespace : str
+        A level of isolation provided by the platform (e.g., Kubernetes)
+    labels : dict
+        A dict that is used for looking up the function (immutable, can't update after first deployment)
+    annotations : dict
+        A dict of annotations
+
+    """
     name: str = 'nuclio-function'
     namespace: str = 'nuclio'
     labels: Dict[str, str] = Field(default_factory=lambda: dict())
@@ -79,7 +93,52 @@ class PlatformSpec(CamelBaseModel):
 
 
 class NuclioPythonSpec(CamelBaseModel):
+    """ Nuclio function highest level specification
 
+    Learn more here: https://nuclio.io/docs/latest/reference/function-configuration/function-configuration-reference/#function-specification-spec
+
+    Attributes
+    ----------
+    runtime : str
+        The name of the language runtime (python:3.6, python:3.7, etc.)
+    handler : str
+        The entry point to the function, in the form of package:entrypoint; varies slightly between runtimes, see the
+         appropriate runtime documentation for specifics
+    description : str, optional
+        A textual description of the function
+    image : str, optional
+        Potential code entry type for specifying a nuclio function as a docker image directly
+    min_replicas : int, optional
+        The minimum number of replicas
+    max_replicas : int, optional
+        The maximum number of replicas
+    replicas : int, optional
+        The number of desired instances; 0 for auto-scaling.
+    target_cpu : int, optional
+        Target CPU when auto scaling, as a percentage (default: 75%)
+    readiness_timeout_seconds : int, optional
+        Number of seconds that the controller will wait for the function to become ready before declaring
+        failure (default: 60)
+    event_timeout : int, optional
+        Global event timeout, in the format supported for the Duration parameter of the time.ParseDuration Go function
+    avatar : str, optional
+        Base64 representation of an icon to be shown in UI for the function
+    run_registry : str, optional
+        The container image repository from which the platform will pull the image
+    env : list
+        A list of environment variables dicts or specs
+    volumes : list
+        A map in an architecture similar to Kubernetes volumes
+    triggers : dict
+        A map of triggers for a nuclio function like http or kafka
+    resources : ResourcesSpec, optional
+        Limit resources allocated to deployed function
+    platform : PlatformSpec, optional
+        Docker options for nuclio functions
+    security_context : SecurityContextSpec, optional
+        Unix style image security constraints like users and groups
+
+    """
     runtime: str = "python:3.6"
     handler: str = "main:handler"
     description: Optional[str] = None
