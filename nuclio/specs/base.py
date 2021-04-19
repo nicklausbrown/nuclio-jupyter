@@ -12,6 +12,8 @@ from .code_entry import CodeEntryType, S3Attributes, ArchiveAttributes, GithubAt
 class FunctionMetadata(CamelBaseModel):
     """ Nuclio function metadata
 
+    Learn more here: https://nuclio.io/docs/latest/reference/function-configuration/function-configuration-reference/#function-metadata-metadata
+
     Attributes
     ----------
     name : str
@@ -51,22 +53,70 @@ class BuildSpec(CamelBaseModel):
 
 
 class EnvVariableSpec(CamelBaseModel):
+    """ Mapping of name to value for the environment
+
+    Attributes
+    ----------
+    name : str
+        Variable name
+    value : str
+        Variable value
+
+    """
     name: str
     value: str
 
 
 class SecurityContextSpec(CamelBaseModel):
+    """ Container security spec
+
+    Attributes
+    ----------
+    run_as_user : int
+        The user ID (UID) for runing the entry point of the container process
+    run_as_group : int
+        The group ID (GID) for running the entry point of the container process
+    fs_group: int
+        A supplemental group to add and use for running the entry point of the container process
+
+    """
     run_as_user: int = None
     run_as_group: int = None
     fs_group: int = None
 
 
 class ResourcesSpec(CamelBaseModel):
+    """ K8s style resource specification
+
+    Check it out here: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+
+    Attributes
+    ----------
+    requests : Resources
+        Resource requests
+    limits : Resources
+        Resource limits
+
+    """
 
     class Resources(CamelBaseModel):
-        cpu: int = None
-        memory: str = None
-        gpu: str = Field(default=None, alias='nvidia.com/gpu')
+        """ K8s style resource specification
+
+        Check it out here: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+
+        Attributes
+        ----------
+        cpu : int, optional
+            number of cpus available to the replica
+        memory : str, optional
+            amount of memory available to the replica
+        gpu : str, optional
+            number of gpus available to the replica
+
+        """
+        cpu: Optional[int] = None
+        memory: Optional[str] = None
+        gpu: Optional[str] = Field(default=None, alias='nvidia.com/gpu')
 
     requests: Resources = Resources()
     limits: Resources = Resources()
