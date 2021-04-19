@@ -6,7 +6,7 @@ from pydantic import Field
 from nuclio.specs import CamelBaseModel
 from .volume import VolumeSpec
 from .trigger import HttpTrigger, KafkaTrigger, V3ioStreamTrigger, CronTrigger
-from .code import CodeEntryType, S3Attributes, ArchiveAttributes, GithubAttributes
+from .code_entry import CodeEntryType, S3Attributes, ArchiveAttributes, GithubAttributes
 
 
 class FunctionMetadata(CamelBaseModel):
