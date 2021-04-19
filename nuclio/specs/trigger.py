@@ -1,5 +1,4 @@
-
-import enum
+from enum import Enum
 from typing import Optional, Dict, Union, List
 from pydantic import Field, SecretStr
 
@@ -34,12 +33,12 @@ class CronTrigger(CamelBaseModel):
             self.attributes.interval = data['interval']
 
 
-class KafkaOffsetOptions(enum.Enum):
+class KafkaOffsetOptions(Enum):
     earliest = 'earliest'
     latest = 'latest'
 
 
-class KafkaWorkerAllocationModeOptions(enum.Enum):
+class KafkaWorkerAllocationModeOptions(Enum):
     static = 'static'
     pool = 'pool'
 
@@ -75,7 +74,7 @@ class KafkaTrigger(CamelBaseModel):
     attributes: Attributes = Attributes()
 
 
-class V3ioOffsetOptions(enum.Enum):
+class V3ioOffsetOptions(Enum):
     earliest = 'Earliest'
     latest = 'Latest'
 
@@ -118,7 +117,7 @@ class HttpCORS(CamelBaseModel):
     preflight_max_age_seconds: Optional[int] = None
 
 
-class HttpServiceOptions(enum.Enum):
+class HttpServiceOptions(Enum):
     internal = 'ClusterIP'
     external = 'NodePort'
 

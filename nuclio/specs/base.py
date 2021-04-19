@@ -6,27 +6,34 @@ from pydantic import Field
 from nuclio.specs import CamelBaseModel
 from .volume import VolumeSpec
 from .trigger import HttpTrigger, KafkaTrigger, V3ioStreamTrigger, CronTrigger
+from .code import CodeEntryType, S3Attributes, ArchiveAttributes, GithubAttributes
 
 
 class FunctionMetadata(CamelBaseModel):
-    name: str = 'function'
+    name: str = 'nuclio-function'
     namespace: str = 'nuclio'
-    labels: Dict[str, Union[str, int]] = Field(default_factory=lambda: dict())
-    annotations: Dict[str, Union[str, int]] = Field(default_factory=lambda: dict())
+    labels: Dict[str, str] = Field(default_factory=lambda: dict())
+    annotations: Dict[str, str] = Field(default_factory=lambda: dict())
 
 
 class BuildSpec(CamelBaseModel):
+
+    code_entry_type: Optional[CodeEntryType] = None
+    code_entry_attributes: Optional[Union[S3Attributes, ArchiveAttributes, GithubAttributes]] = None
+
     path: str = None
     function_source_code: str = None
-    registry: str = None
-    no_base_image_pull: bool = None
+
     no_cache: bool = None
-    base_image: str = 'python:3.6'
-    commands: List[str] = Field(default_factory=lambda: list(), alias='Commands')
+    no_base_image_pull: bool = None
+
+    registry: str = None
     onbuild_image: str = None
-    image: str = None
-    code_entry_type: str = None
-    code_entry_attributes: str = None
+    base_image: str = None
+
+    commands: List[str] = Field(default_factory=lambda: list(), alias='Commands')
+
+    image: Optional[str] = None
 
 
 class EnvVariableSpec(CamelBaseModel):
@@ -87,13 +94,14 @@ class NuclioPythonSpec(CamelBaseModel):
     readiness_timeout_seconds: Optional[int] = None
     event_timeout: Optional[int] = None
     avatar: Optional[str] = None
+    run_registry: Optional[str] = None
 
     env: List[EnvVariableSpec] = Field(default_factory=lambda: list())
     volumes: List[VolumeSpec] = Field(default_factory=lambda: list())
-    triggers: List[Union[HttpTrigger,
-                         KafkaTrigger,
-                         V3ioStreamTrigger,
-                         CronTrigger]] = Field(default_factory=lambda: list())
+    triggers: Dict[str, Union[HttpTrigger,
+                              KafkaTrigger,
+                              V3ioStreamTrigger,
+                              CronTrigger]] = Field(default_factory=lambda: dict())
     resources: Optional[ResourcesSpec] = ResourcesSpec()
     platform: Optional[PlatformSpec] = PlatformSpec()
     security_context: Optional[SecurityContextSpec] = SecurityContextSpec()
@@ -113,11 +121,11 @@ class NuclioConfig(CamelBaseModel):
         else:
             self.spec.env.append(variable)
 
-    def add_mount(self, volume: VolumeSpec):
+    def add_volume(self, volume: VolumeSpec):
         self.spec.volumes.append(volume)
 
-    def add_trigger(self, trigger: Union[HttpTrigger, KafkaTrigger, V3ioStreamTrigger, CronTrigger]):
-        self.spec.triggers.append(trigger)
+    def add_trigger(self, name, trigger: Union[HttpTrigger, KafkaTrigger, V3ioStreamTrigger, CronTrigger]):
+        self.spec.triggers[name] = trigger
 
     def to_dict(self, *args, **kwargs):
         return self.dict(*args, **kwargs)
